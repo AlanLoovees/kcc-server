@@ -27,7 +27,7 @@ app.get("/fetchStateWise", (req, res) => {
     fetch("https://api.covid19india.org/data.json")
     .then((response) => response.json())
     .then((data) => {
-      let write = JSON.stringify(data.statewise[5])
+      let write = JSON.stringify(data.statewise[2])
       fs.writeFile('stateWise.json', write, (err) => {if(err) throw err})
       res.send(data.statewise[5])
     });
