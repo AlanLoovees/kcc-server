@@ -9,7 +9,7 @@ const app = express();
 app.use(cors())
 const server = http.createServer(app);
 
-const refresh = 18*60
+const refresh = 13*60
 const date = new Date()
 const now = date.getHours()*60 + date.getMinutes()
 
