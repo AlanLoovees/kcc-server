@@ -29,7 +29,7 @@ app.get("/fetchStateWise", (req, res) => {
     .then((data) => {
       let write = JSON.stringify(data.statewise[2])
       fs.writeFile('stateWise.json', write, (err) => {if(err) throw err})
-      res.send(data.statewise[5])
+      res.send(data.statewise[2])
     });
   }
   else {
