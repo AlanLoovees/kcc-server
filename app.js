@@ -10,11 +10,12 @@ app.use(cors())
 const server = http.createServer(app);
 
 const refresh = 13*60
+const keep = 18*60
 const date = new Date()
 const now = date.getHours()*60 + date.getMinutes()
 
 function checkTime() {
-  if (refresh <= now) {
+  if (refresh <= now && now <= keep) {
     return true
   }
   else {
