@@ -4,7 +4,8 @@
   "description": "API for fetching and storing daily Covid 19 case count in Kerala",
   "main": "app.js",
   "scripts": {
-    "start": "nodemon app.js"
+    "start": "nodemon app.js",
+    "test": "mocha"
   },
   "author": "Alan Loovees",
   "license": "ISC",
