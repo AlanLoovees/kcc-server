@@ -4,13 +4,19 @@ var http = require("http");
 var fetch = require("node-fetch");
 var cors = require("cors");
 var fs = require("fs");
+var parse = require("csv-parse");
+
+
+var parser = parse({columns: true}, function (err, records) {
+	console.log(records);
+});
 
 const app = express();
 app.use(cors())
 const server = http.createServer(app);
 
-const refresh = 13*60
-const keep = 18*60
+const refresh = 1*60
+const keep = 23*60
 const date = new Date()
 const now = date.getHours()*60 + date.getMinutes()
 
@@ -24,22 +30,19 @@ function checkTime() {
 }
 
 app.get("/fetchStateWise", (req, res) => {
-  if (checkTime()) {
-    fetch("https://api.covid19india.org/data.json")
-    .then((response) => response.json())
-    .then((data) => {
-      let write = JSON.stringify(data.statewise[2])
-      fs.writeFile('stateWise.json', write, (err) => {if(err) throw err})
-      res.send(data.statewise[2])
+  fetch("https://api.covid19india.org/csv/latest/state_wise_daily.csv")
+    .then((response) => response.text())
+    .then((text) => {
+      var allTextLines = text.split(/\r\n|\n/);
+      var headers = allTextLines[0].split(",");
+      var pos = 0;
+      while (pos < headers.length) {
+        if (headers[pos] == "KL") break;
+        pos += 1;
+      }
+      var newConfirmed = allTextLines[allTextLines.length - 3].split(",");
+      res.send(newConfirmed[pos]);
     });
-  }
-  else {
-    fs.readFile('stateWise.json', (err, data) => {
-      if (err) throw err
-      let read = JSON.parse(data)
-      res.send(read)
-    });
-  }
 });
 
 app.get("/fetchDistrictWise", (req, res) => {
