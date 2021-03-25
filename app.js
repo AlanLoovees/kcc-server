@@ -15,19 +15,9 @@ const app = express();
 app.use(cors())
 const server = http.createServer(app);
 
-const refresh = 1*60
-const keep = 23*60
-const date = new Date()
-const now = date.getHours()*60 + date.getMinutes()
-
-function checkTime() {
-  if (refresh <= now && now <= keep) {
-    return true
-  }
-  else {
-    return false
-  }
-}
+var today = new Date().toISOString().split('T')[0]
+var yesterday = new Date(new Date().getFullYear(), new Date().getMonth(), new Date(new Date().getDate())).toISOString().split('T')[0]
+var dayBefore = new Date(new Date().getFullYear(), new Date().getMonth(), new Date(new Date().getDate() - 1)).toISOString().split('T')[0]
 
 app.get("/fetchStateWise", (req, res) => {
   fetch("https://api.covid19india.org/csv/latest/state_wise_daily.csv")
@@ -36,32 +26,63 @@ app.get("/fetchStateWise", (req, res) => {
       var allTextLines = text.split(/\r\n|\n/);
       var headers = allTextLines[0].split(",");
       var pos = 0;
+      
       while (pos < headers.length) {
         if (headers[pos] == "KL") break;
         pos += 1;
       }
+
       var newConfirmed = allTextLines[allTextLines.length - 3].split(",");
       res.send(newConfirmed[pos]);
     });
 });
 
 app.get("/fetchDistrictWise", (req, res) => {
-  if (checkTime()) {
-    fetch("https://api.covid19india.org/state_district_wise.json")
-    .then((response) => response.json())
-    .then((data) => {
-      let write = JSON.stringify(data.Kerala.districtData)
-      fs.writeFile('districtWise.json', write, (err) => {if(err) throw err})
-      res.send(data.Kerala.districtData)
+  fetch("https://api.covid19india.org/csv/latest/districts.csv")
+    .then((response) => response.text())
+    .then((text) => {
+      var allTextLines = text.split(/\r\n|\n/);
+
+      var oldData = []
+      var prevData = []
+      var newData = []
+      var finalData = []
+
+      for(i=0; i<allTextLines.length; i++) {
+        if (allTextLines[i].split(',')[0] == dayBefore && allTextLines[i].split(',')[1] == "Kerala") {
+          oldData.push(allTextLines[i].split(','));
+        }
+      }
+
+      for(i=0; i<allTextLines.length; i++) {
+        if (allTextLines[i].split(',')[0] == yesterday && allTextLines[i].split(',')[1] == "Kerala") {
+          prevData.push(allTextLines[i].split(','));
+        }
+      }
+
+      for(i=0; i<allTextLines.length; i++) {
+        if (allTextLines[i].split(',')[0] == today && allTextLines[i].split(',')[1] == "Kerala") {
+          newData.push(allTextLines[i].split(','));
+        }
+      }
+
+      for(i=0; i<prevData.length; i++) {
+        if(prevData[i][2] == newData[i][2]) {
+          newConfirmed = newData[i][3] - prevData[i][3];
+          if(newConfirmed) {
+            finalData.push([prevData[i][2], newConfirmed])
+          }
+          else {
+            newConfirmed = prevData[i][3] - oldData[i][3];
+            finalData.push([prevData[i][2], newConfirmed])
+          }
+        }
+      }
+
+      finalData = JSON.stringify(finalData)
+      res.send(finalData)      
+
     });
-  }
-  else {
-    fs.readFile('districtWise.json', (err, data) => {
-      if (err) throw err
-      let read = JSON.parse(data)
-      res.send(read)
-    });
-  }
 });
 
 const port = process.env.PORT || 3000;
