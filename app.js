@@ -48,6 +48,8 @@ app.get("/fetchDistrictWise", (req, res) => {
       var newData = []
       var finalData = []
 
+      var old = 0
+
       for(i=0; i<allTextLines.length; i++) {
         if (allTextLines[i].split(',')[0] == dayBefore && allTextLines[i].split(',')[1] == "Kerala") {
           oldData.push(allTextLines[i].split(','));
@@ -75,11 +77,17 @@ app.get("/fetchDistrictWise", (req, res) => {
           else {
             newConfirmed = prevData[i][3] - oldData[i][3];
             finalData.push([prevData[i][2], newConfirmed])
+            old = 1
           }
         }
       }
 
-      finalData.push(["Date", yesterday])
+      if(old) {
+        finalData.push(["Date", yesterday])
+      }
+      else {
+        finalData.push(["Date", today])
+      }
 
       finalData = JSON.stringify(finalData)
       res.send(finalData)      
