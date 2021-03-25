@@ -16,8 +16,8 @@ app.use(cors())
 const server = http.createServer(app);
 
 var today = new Date().toISOString().split('T')[0]
-var yesterday = new Date(new Date().getFullYear(), new Date().getMonth(), new Date(new Date().getDate())).toISOString().split('T')[0]
-var dayBefore = new Date(new Date().getFullYear(), new Date().getMonth(), new Date(new Date().getDate() - 1)).toISOString().split('T')[0]
+var yesterday = new Date(new Date().getFullYear(), new Date().getMonth(), new Date(new Date().getDate() - 1)).toISOString().split('T')[0]
+var dayBefore = new Date(new Date().getFullYear(), new Date().getMonth(), new Date(new Date().getDate() - 2)).toISOString().split('T')[0]
 
 app.get("/fetchStateWise", (req, res) => {
   fetch("https://api.covid19india.org/csv/latest/state_wise_daily.csv")
