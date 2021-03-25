@@ -79,7 +79,7 @@ app.get("/fetchDistrictWise", (req, res) => {
         }
       }
 
-      finalData.push(["Date", today])
+      finalData.push(["Date", yesterday])
 
       finalData = JSON.stringify(finalData)
       res.send(finalData)      
